@@ -1,25 +1,152 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GTA VI trophy checklist</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1022">
+  <title>GTA VI Trophy Guide | Leonida Ops</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-  <h1>GTA VI trophy checklist</h1>
-  <p id="progress">0 of 55 earned</p>
-</header>
-<div class="controls">
-  <label>Grade <select id="grade"><option value="all">All</option><option value="platinum">Platinum</option><option value="gold">Gold</option><option value="silver">Silver</option><option value="bronze">Bronze</option></select></label>
-  <button id="export" type="button">Export progress</button>
-  <label class="import">Import progress <input id="import" type="file" accept="application/json"></label>
-</div>
-<table>
-  <thead><tr><th>Earned</th><th>Trophy</th><th>Grade</th><th>How to get it</th></tr></thead>
-  <tbody id="rows"></tbody>
-</table>
-<script type="module" src="app.js"></script>
+  <div class="glow glow-left" aria-hidden="true"></div>
+  <div class="glow glow-right" aria-hidden="true"></div>
+
+  <header class="hero shell">
+    <div class="eyebrow"><span class="eyebrow-dot"></span> LEONIDA OPS / TROPHY CONTROL</div>
+    <div class="hero-grid">
+      <div>
+        <p class="kicker">Grand Theft Auto VI · PS5</p>
+        <h1>Make Vice <em>count.</em></h1>
+        <p class="hero-copy">A calm, spoiler-aware route through all 55 trophies. Mark the moments, keep a save before the big turns, and turn every neon corner into progress.</p>
+      </div>
+      <div class="progress-card" aria-label="Trophy progress">
+        <div class="progress-head">
+          <span>Leonida legend</span>
+          <strong id="progress-percent">0%</strong>
+        </div>
+        <div class="progress-track" role="progressbar" aria-label="Trophy completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div id="progress-bar" class="progress-bar"></div>
+        </div>
+        <div class="progress-foot">
+          <strong id="progress">0 / 55 earned</strong>
+          <span id="progress-summary">Start with the story, finish with the sweep.</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section id="roadmap" class="roadmap panel" aria-labelledby="roadmap-title">
+      <div class="section-heading">
+        <div>
+          <p class="section-label">THE ROUTE</p>
+          <h2 id="roadmap-title">Roadmap to the platinum</h2>
+        </div>
+        <span class="section-note">Four stages · save early, sweep once</span>
+      </div>
+      <ol class="roadmap-list">
+        <li data-stage="1">
+          <span class="stage-number">01</span>
+          <div><h3>Story playthrough</h3><p>Play the Prologue (Gone Fishing), Chapters 1–4, then the final mission. Make a separate manual save at each chapter start and before the finale: there is no mission replay.</p></div>
+        </li>
+        <li data-stage="2">
+          <span class="stage-number">02</span>
+          <div><h3>Side content</h3><p>Complete 8 stranger strands and sample every activity. Win 20 different races, visit every Top Fun venue, and finish fishing, arcade, and partner activities.</p></div>
+        </li>
+        <li data-stage="3">
+          <span class="stage-number">03</span>
+          <div><h3>Collectibles &amp; grind</h3><p>Clear 3 card sets, 100 WAiNK locations, 100 vehicle discoveries, 250 stunts, 50 Challenges, and 5 Bank Vaults. Register 10 vehicles, launder $250,000, spend $100,000, buy all garages, and gold the range.</p></div>
+        </li>
+        <li data-stage="4">
+          <span class="stage-number">04</span>
+          <div><h3>Cleanup + platinum</h3><p>Explore the remaining map, resolve one-off encounters, and check every locked trophy. Reach 100% completion, verify meditation against your early save, and earn Vice Got a Price! for the platinum.</p></div>
+        </li>
+      </ol>
+      <p class="roadmap-warning"><strong>Missable · Positive Mental Attitude</strong> — use Lucia’s Chapter 1 balcony meditation spot before the chapter ends. Keep your chapter-start manual save; there is no mission replay. The data’s reported 18-spot total remains unconfirmed.</p>
+    </section>
+
+    <section class="tracker panel" aria-labelledby="tracker-title">
+      <div class="section-heading tracker-heading">
+        <div>
+          <p class="section-label">THE CHECKLIST</p>
+          <h2 id="tracker-title">Trophy tracker</h2>
+        </div>
+        <span id="results-count" class="section-note">55 trophies</span>
+      </div>
+
+      <div class="controls" aria-label="Trophy filters">
+        <label class="search-control" for="search">
+          <span>Find a trophy</span>
+          <input id="search" type="search" placeholder="Search names, guides, or descriptions" autocomplete="off">
+        </label>
+        <label for="kind">
+          <span>Kind</span>
+          <select id="kind">
+            <option value="all">All kinds</option>
+            <option value="story">Story</option>
+            <option value="missable">Missable</option>
+            <option value="collectibles">Collectibles</option>
+            <option value="activities">Activities</option>
+            <option value="online">Online</option>
+          </select>
+        </label>
+        <label for="grade">
+          <span>Grade</span>
+          <select id="grade">
+            <option value="all">All grades</option>
+            <option value="platinum">Platinum</option>
+            <option value="gold">Gold</option>
+            <option value="silver">Silver</option>
+            <option value="bronze">Bronze</option>
+          </select>
+        </label>
+        <label class="toggle-control" for="spoiler">
+          <input id="spoiler" type="checkbox">
+          <span class="toggle" aria-hidden="true"></span>
+          <span>Hide story spoilers</span>
+        </label>
+        <div class="file-actions">
+          <button id="export" class="button button-primary" type="button">Export progress</button>
+          <label class="button button-quiet" for="import">Import progress<input id="import" type="file" accept="application/json"></label>
+        </div>
+      </div>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+
+      <div class="tracker-grid">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th scope="col">Done</th><th scope="col">Trophy</th><th scope="col">Grade</th><th scope="col">Route</th></tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+          <div id="empty" class="empty" hidden>No trophies match those filters.</div>
+        </div>
+
+        <aside id="detail" class="detail" aria-labelledby="detail-title">
+          <div class="detail-empty">
+            <span class="detail-mark">✦</span>
+            <p class="section-label">FIELD NOTES</p>
+            <h2>Select a trophy</h2>
+            <p>Choose a row to open its guide, route stage, and source links.</p>
+          </div>
+          <div id="detail-content" hidden>
+            <div class="detail-topline"><span id="detail-kind" class="pill">Story</span><span id="detail-missable" class="missable-badge" hidden>Missable</span></div>
+            <h2 id="detail-title"></h2>
+            <p id="detail-description" class="detail-description"></p>
+            <div class="detail-meta">
+              <div><span>Grade</span><strong id="detail-grade"></strong></div>
+              <div><span>Roadmap</span><strong id="detail-stage"></strong></div>
+            </div>
+            <div class="detail-block"><h3>Your guide</h3><p id="detail-guide"></p></div>
+            <div class="detail-block"><h3>Sources</h3><ul id="detail-sources" class="source-list"></ul></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="shell footer"><span>GTA VI Trophy Guide · offline-ready field notes</span><a href="#roadmap">Back to roadmap ↑</a></footer>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
