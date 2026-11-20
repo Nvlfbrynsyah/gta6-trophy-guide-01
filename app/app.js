@@ -6,36 +6,29 @@ const STAGE_NAMES = {
   3: 'Collectibles & grind',
   4: 'Cleanup + platinum',
 };
+const GRADE_ORDER = ['platinum', 'gold', 'silver', 'bronze'];
 
-function kindFor(trophy) {
-  return trophy.kind;
-}
-
-function stageFor(trophy) {
-  return trophy.roadmap_stage;
-}
-
-function sourceFor(trophy) {
-  return trophy.sources;
-}
-
-const rows = document.getElementById('rows');
-const empty = document.getElementById('empty');
-const detail = document.getElementById('detail');
-const detailContent = document.getElementById('detail-content');
+const $ = (id) => document.getElementById(id);
+const rows = $('rows');
+const empty = $('empty');
+const detail = $('detail');
+const detailContent = $('detail-content');
 const detailEmpty = detail.querySelector('.detail-empty');
-const search = document.getElementById('search');
-const kind = document.getElementById('kind');
-const grade = document.getElementById('grade');
-const spoiler = document.getElementById('spoiler');
-const status = document.getElementById('status');
-const resultsCount = document.getElementById('results-count');
-const progress = document.getElementById('progress');
-const progressPercent = document.getElementById('progress-percent');
-const progressBar = document.getElementById('progress-bar');
+const search = $('search');
+const kind = $('kind');
+const grade = $('grade');
+const stage = $('stage');
+const sort = $('sort');
+const spoiler = $('spoiler');
+const hideEarned = $('hide-earned');
+const status = $('status');
+const resultsCount = $('results-count');
+const progress = $('progress');
+const progressPercent = $('progress-percent');
+const progressBar = $('progress-bar');
 const progressTrack = document.querySelector('.progress-track');
 
-let catalogue;
+let catalogue = [];
 let earned = new Set();
 let selectedName = null;
 
@@ -60,33 +53,101 @@ function announce(message) {
 }
 
 function isHidden(trophy) {
-  return spoiler.checked && kindFor(trophy) === 'story' && !earned.has(trophy.name);
+  return spoiler.checked && trophy.kind === 'story' && !earned.has(trophy.name);
 }
 
-function visibleTrophies() {
-  const query = search.value.trim().toLowerCase();
-  return catalogue.filter((trophy) => {
-    const trophyKind = kindFor(trophy);
-    const searchable = `${trophy.name} ${trophy.description} ${trophy.guide} ${trophyKind}`.toLowerCase();
-    return (kind.value === 'all' || trophyKind === kind.value)
-      && (grade.value === 'all' || trophy.grade === grade.value)
-      && (!query || searchable.includes(query));
-  });
-}
-
-function gradeLabel(value) {
+function formatGrade(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function estimatedHours(value) {
+  const normalized = value.toLowerCase();
+  const values = [...normalized.matchAll(/(\d+(?:\.\d+)?)/g)].map((match) => Number(match[1]));
+  if (!values.length) return 0;
+  let amount = values.length > 1 ? (values[0] + values[1]) / 2 : values[0];
+  if (normalized.includes('+')) amount *= 1.5;
+  if (normalized.includes('min')) amount /= 60;
+  return amount;
+}
+
+function overallDifficultyLabel(average) {
+  if (average < 1.5) return 'Trivial';
+  if (average < 2.5) return 'Manageable';
+  if (average < 3.5) return 'Moderate';
+  if (average < 4.5) return 'Demanding';
+  return 'Long-haul';
+}
+
+function renderPlatinumSummary() {
+  const hours = catalogue.reduce((sum, trophy) => sum + estimatedHours(trophy.time_estimate), 0);
+  const difficulty = catalogue.reduce((sum, trophy) => sum + trophy.difficulty, 0) / catalogue.length;
+  const roundedHours = Math.round(hours);
+  $('platinum-summary').textContent = `Estimated combined effort: ~${roundedHours} h · overall difficulty: ${overallDifficultyLabel(difficulty)} (average ${difficulty.toFixed(1)}/5).`;
 }
 
 function renderProgress() {
   const earnedCount = catalogue.filter((trophy) => earned.has(trophy.name)).length;
-  const percent = Math.round((earnedCount / catalogue.length) * 100);
+  const percent = catalogue.length ? Math.round((earnedCount / catalogue.length) * 100) : 0;
   progress.textContent = `${earnedCount} / ${catalogue.length} earned`;
   progressPercent.textContent = `${percent}%`;
   progressBar.style.width = `${percent}%`;
   progressTrack.setAttribute('aria-valuenow', String(percent));
   progressTrack.setAttribute('aria-valuetext', `${earnedCount} of ${catalogue.length} trophies earned`);
-  document.getElementById('progress-summary').textContent = percent === 100 ? 'Leonida Legend status confirmed.' : `${catalogue.length - earnedCount} trophies remain on the board.`;
+  $('progress-summary').textContent = percent === 100 ? 'Leonida Legend status confirmed.' : `${catalogue.length - earnedCount} trophies remain on the board.`;
+
+  const gradeCounts = Object.fromEntries(GRADE_ORDER.map((value) => [value, { earned: 0, total: 0 }]));
+  for (const trophy of catalogue) {
+    gradeCounts[trophy.grade].total += 1;
+    if (earned.has(trophy.name)) gradeCounts[trophy.grade].earned += 1;
+  }
+  const breakdown = $('grade-breakdown');
+  breakdown.replaceChildren();
+  for (const value of GRADE_ORDER) {
+    const item = document.createElement('span');
+    item.className = `grade-stat grade-stat-${value}`;
+    item.textContent = `${formatGrade(value)} ${gradeCounts[value].earned}/${gradeCounts[value].total}`;
+    breakdown.append(item);
+  }
+
+  for (let stageNumber = 1; stageNumber <= 4; stageNumber += 1) {
+    const trophies = catalogue.filter((trophy) => trophy.roadmap_stage === stageNumber);
+    const count = trophies.length;
+    const stageEarned = trophies.filter((trophy) => earned.has(trophy.name)).length;
+    const stagePercent = count ? Math.round(stageEarned / count * 100) : 0;
+    $(`stage-count-${stageNumber}`).textContent = `${count} ${count === 1 ? 'trophy' : 'trophies'}`;
+    $(`stage-earned-${stageNumber}`).textContent = `${stageEarned} / ${count} earned`;
+    $(`stage-progress-${stageNumber}`).style.width = `${stagePercent}%`;
+    const button = document.querySelector(`.stage-card[data-stage="${stageNumber}"]`);
+    button.setAttribute('aria-pressed', String(stage.value === String(stageNumber)));
+  }
+}
+
+function compareTime(a, b) {
+  return estimatedHours(b.time_estimate) - estimatedHours(a.time_estimate);
+}
+
+function sortedTrophies(list) {
+  const gradeIndex = (value) => GRADE_ORDER.indexOf(value);
+  return [...list].sort((a, b) => {
+    if (sort.value === 'name') return a.name.localeCompare(b.name);
+    if (sort.value === 'grade') return gradeIndex(a.grade) - gradeIndex(b.grade) || a.id - b.id;
+    if (sort.value === 'difficulty') return b.difficulty - a.difficulty || a.id - b.id;
+    if (sort.value === 'time') return compareTime(a, b) || a.id - b.id;
+    return a.roadmap_stage - b.roadmap_stage || a.id - b.id;
+  });
+}
+
+function visibleTrophies() {
+  const query = search.value.trim().toLowerCase();
+  const filtered = catalogue.filter((trophy) => {
+    const searchable = `${trophy.name} ${trophy.description} ${trophy.guide} ${trophy.kind}`.toLowerCase();
+    return (kind.value === 'all' || (kind.value === 'missable' ? trophy.missable === true : trophy.kind === kind.value))
+      && (grade.value === 'all' || trophy.grade === grade.value)
+      && (stage.value === 'all' || trophy.roadmap_stage === Number(stage.value))
+      && (!hideEarned.checked || !earned.has(trophy.name))
+      && (!query || searchable.includes(query));
+  });
+  return sortedTrophies(filtered);
 }
 
 function renderRows() {
@@ -114,9 +175,7 @@ function renderRows() {
       if (checkbox.checked) earned.add(trophy.name);
       else earned.delete(trophy.name);
       saveEarned();
-      renderProgress();
-      renderRows();
-      renderDetail(trophy);
+      render();
     });
     doneCell.append(checkbox);
 
@@ -127,17 +186,25 @@ function renderRows() {
     const description = document.createElement('span');
     description.className = 'trophy-description';
     description.textContent = hidden ? 'Story details are hidden by your spoiler setting.' : trophy.description;
-    titleCell.append(title, description);
+    const meta = document.createElement('span');
+    meta.className = 'trophy-meta';
+    meta.textContent = `Difficulty ${trophy.difficulty}/5 · ${trophy.time_estimate}`;
+    titleCell.append(title, description, meta);
+    if (trophy.missable) {
+      const marker = document.createElement('span');
+      marker.className = 'row-missable';
+      marker.textContent = 'MISSABLE';
+      titleCell.append(marker);
+    }
 
     const gradeCell = document.createElement('td');
     const badge = document.createElement('span');
     badge.className = `grade grade-${trophy.grade}`;
-    badge.textContent = gradeLabel(trophy.grade);
+    badge.textContent = formatGrade(trophy.grade);
     gradeCell.append(badge);
 
     const routeCell = document.createElement('td');
-    routeCell.textContent = `${STAGE_NAMES[stageFor(trophy)]} · ${kindFor(trophy)}`;
-
+    routeCell.textContent = `Stage ${trophy.roadmap_stage} · ${trophy.kind}`;
     row.append(doneCell, titleCell, gradeCell, routeCell);
     row.addEventListener('click', () => {
       selectedName = trophy.name;
@@ -156,6 +223,14 @@ function renderRows() {
   }
 }
 
+function targetFor(trophy) {
+  if (trophy.count === undefined) return '';
+  if (trophy.name === 'A Long Road') return '100% completion';
+  if (trophy.name === 'Dime on the Dollar') return '$250,000 laundered';
+  if (trophy.name === 'Treat Yo Self') return '$100,000 spent';
+  return trophy.description.replace(/^[^0-9$]*/, '').replace(/[.!?]+$/, '').trim();
+}
+
 function renderDetail(trophy) {
   if (!trophy) {
     detailEmpty.hidden = false;
@@ -165,16 +240,24 @@ function renderDetail(trophy) {
   const hidden = isHidden(trophy);
   detailEmpty.hidden = true;
   detailContent.hidden = false;
-  document.getElementById('detail-kind').textContent = kindFor(trophy);
-  document.getElementById('detail-missable').hidden = !trophy.missable;
-  document.getElementById('detail-title').textContent = hidden ? 'Hidden story trophy — earn it to reveal' : trophy.name;
-  document.getElementById('detail-description').textContent = hidden ? 'Hidden story trophy — earn it to reveal' : trophy.description;
-  document.getElementById('detail-grade').textContent = gradeLabel(trophy.grade);
-  document.getElementById('detail-stage').textContent = `${stageFor(trophy)} · ${STAGE_NAMES[stageFor(trophy)]}`;
-  document.getElementById('detail-guide').textContent = hidden ? 'Turn off “Hide story spoilers” to read this guide.' : trophy.guide;
-  const sourceList = document.getElementById('detail-sources');
+  $('detail-kind').textContent = trophy.kind;
+  $('detail-missable').hidden = !trophy.missable;
+  $('detail-title').textContent = hidden ? 'Hidden story trophy — earn it to reveal' : trophy.name;
+  $('detail-description').textContent = hidden ? 'Hidden story trophy — earn it to reveal' : trophy.description;
+  $('detail-grade').textContent = formatGrade(trophy.grade);
+  $('detail-stage').textContent = `${trophy.roadmap_stage} · ${STAGE_NAMES[trophy.roadmap_stage]}`;
+  $('detail-difficulty').textContent = `${trophy.difficulty}/5`;
+  $('detail-time').textContent = trophy.time_estimate;
+  $('detail-guide').textContent = hidden ? 'Turn off “Hide story spoilers” to read this guide.' : trophy.guide;
+  const target = targetFor(trophy);
+  $('detail-target').hidden = !target;
+  $('detail-target').textContent = target ? `Target: ${target}` : '';
+  $('detail-missable-note').hidden = !trophy.missable_note;
+  $('detail-missable-text').textContent = trophy.missable_note ?? '';
+
+  const sourceList = $('detail-sources');
   sourceList.replaceChildren();
-  for (const source of sourceFor(trophy)) {
+  for (const source of trophy.sources ?? []) {
     const item = document.createElement('li');
     const link = document.createElement('a');
     link.href = source.url;
@@ -189,11 +272,10 @@ function renderDetail(trophy) {
 function render() {
   renderProgress();
   renderRows();
-  const selected = catalogue.find((trophy) => trophy.name === selectedName);
-  renderDetail(selected);
+  renderDetail(catalogue.find((trophy) => trophy.name === selectedName));
 }
 
-document.getElementById('export').addEventListener('click', () => {
+$('export').addEventListener('click', () => {
   const file = new Blob([JSON.stringify([...earned], null, 2)], { type: 'application/json' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(file);
@@ -203,7 +285,7 @@ document.getElementById('export').addEventListener('click', () => {
   announce('Progress exported as trophy-progress.json.');
 });
 
-document.getElementById('import').addEventListener('change', async (event) => {
+$('import').addEventListener('change', async (event) => {
   const input = event.target;
   const file = input.files?.[0];
   if (!file) return;
@@ -223,10 +305,29 @@ document.getElementById('import').addEventListener('change', async (event) => {
   }
 });
 
-for (const control of [search, kind, grade]) control.addEventListener('input', renderRows);
+$('reset').addEventListener('click', () => {
+  if (!window.confirm('Clear all saved trophy progress from this browser?')) return;
+  earned.clear();
+  localStorage.removeItem(CHECKLIST_KEY);
+  selectedName = null;
+  render();
+  announce('Trophy progress was reset.');
+});
+
+for (const control of [search, kind, grade, sort, hideEarned]) {
+  control.addEventListener(control.tagName === 'SELECT' ? 'change' : 'input', renderRows);
+}
+stage.addEventListener('change', render);
 spoiler.addEventListener('change', () => {
   localStorage.setItem(SPOILER_KEY, JSON.stringify(spoiler.checked));
   render();
+});
+document.querySelectorAll('.stage-card').forEach((button) => {
+  button.addEventListener('click', () => {
+    stage.value = button.dataset.stage;
+    render();
+    $('tracker-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
 });
 
 const documentData = await (await fetch('data/trophies.json')).json();
@@ -237,4 +338,5 @@ try {
 } catch {
   spoiler.checked = false;
 }
+renderPlatinumSummary();
 render();

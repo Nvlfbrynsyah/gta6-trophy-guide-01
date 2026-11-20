@@ -17,20 +17,16 @@
       <div>
         <p class="kicker">Grand Theft Auto VI · PS5</p>
         <h1>Make Vice <em>count.</em></h1>
-        <p class="hero-copy">A calm, spoiler-aware route through all 55 trophies. Mark the moments, keep a save before the big turns, and turn every neon corner into progress.</p>
+        <p class="hero-copy">A practical, spoiler-aware route through all 55 trophies. Make chapter saves, track long grinds, and turn each checklist item into a clear next step.</p>
+        <p id="platinum-summary" class="platinum-summary">Loading estimated route…</p>
       </div>
       <div class="progress-card" aria-label="Trophy progress">
-        <div class="progress-head">
-          <span>Leonida legend</span>
-          <strong id="progress-percent">0%</strong>
-        </div>
+        <div class="progress-head"><span>Leonida legend</span><strong id="progress-percent">0%</strong></div>
         <div class="progress-track" role="progressbar" aria-label="Trophy completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
           <div id="progress-bar" class="progress-bar"></div>
         </div>
-        <div class="progress-foot">
-          <strong id="progress">0 / 55 earned</strong>
-          <span id="progress-summary">Start with the story, finish with the sweep.</span>
-        </div>
+        <div class="progress-foot"><strong id="progress">0 / 55 earned</strong><span id="progress-summary">Start with the story, finish with the sweep.</span></div>
+        <div id="grade-breakdown" class="grade-breakdown" aria-label="Earned trophies by grade"></div>
       </div>
     </div>
   </header>
@@ -38,106 +34,67 @@
   <main class="shell">
     <section id="roadmap" class="roadmap panel" aria-labelledby="roadmap-title">
       <div class="section-heading">
-        <div>
-          <p class="section-label">THE ROUTE</p>
-          <h2 id="roadmap-title">Roadmap to the platinum</h2>
-        </div>
-        <span class="section-note">Four stages · save early, sweep once</span>
+        <div><p class="section-label">THE ROUTE</p><h2 id="roadmap-title">Roadmap to the platinum</h2></div>
+        <span class="section-note">Select a stage to filter the tracker</span>
       </div>
       <ol class="roadmap-list">
-        <li data-stage="1">
-          <span class="stage-number">01</span>
-          <div><h3>Story playthrough</h3><p>Play the Prologue (Gone Fishing), Chapters 1–4, then the final mission. Make a separate manual save at each chapter start and before the finale: there is no mission replay.</p></div>
-        </li>
-        <li data-stage="2">
-          <span class="stage-number">02</span>
-          <div><h3>Side content</h3><p>Complete 8 stranger strands and sample every activity. Win 20 different races, visit every Top Fun venue, and finish fishing, arcade, and partner activities.</p></div>
-        </li>
-        <li data-stage="3">
-          <span class="stage-number">03</span>
-          <div><h3>Collectibles &amp; grind</h3><p>Clear 3 card sets, 100 WAiNK locations, 100 vehicle discoveries, 250 stunts, 50 Challenges, and 5 Bank Vaults. Register 10 vehicles, launder $250,000, spend $100,000, buy all garages, and gold the range.</p></div>
-        </li>
-        <li data-stage="4">
-          <span class="stage-number">04</span>
-          <div><h3>Cleanup + platinum</h3><p>Explore the remaining map, resolve one-off encounters, and check every locked trophy. Reach 100% completion, verify meditation against your early save, and earn Vice Got a Price! for the platinum.</p></div>
-        </li>
+        <li><button class="stage-card" type="button" data-stage="1" aria-label="Filter tracker to stage 1">
+          <span class="stage-number">01</span><h3>Story playthrough</h3>
+          <p>Complete the Prologue, Chapters 1–4, and the finale. Preserve chapter-start saves, especially the Chapter 1 save for Lucia’s reported balcony meditation.</p>
+          <span class="stage-count" id="stage-count-1">0 trophies</span><span class="stage-progress-text" id="stage-earned-1">0 / 0 earned</span>
+          <span class="mini-track"><span id="stage-progress-1"></span></span>
+        </button></li>
+        <li><button class="stage-card" type="button" data-stage="2" aria-label="Filter tracker to stage 2">
+          <span class="stage-number">02</span><h3>Side content</h3>
+          <p>Work through stranger strands and activities, including races, Top Fun venues, fishing, arcade, and partner objectives.</p>
+          <span class="stage-count" id="stage-count-2">0 trophies</span><span class="stage-progress-text" id="stage-earned-2">0 / 0 earned</span>
+          <span class="mini-track"><span id="stage-progress-2"></span></span>
+        </button></li>
+        <li><button class="stage-card" type="button" data-stage="3" aria-label="Filter tracker to stage 3">
+          <span class="stage-number">03</span><h3>Collectibles &amp; grind</h3>
+          <p>Complete card sets, location and vehicle discoveries, stunts, challenges, vault escapes, registrations, spending, and range medals.</p>
+          <span class="stage-count" id="stage-count-3">0 trophies</span><span class="stage-progress-text" id="stage-earned-3">0 / 0 earned</span>
+          <span class="mini-track"><span id="stage-progress-3"></span></span>
+        </button></li>
+        <li><button class="stage-card" type="button" data-stage="4" aria-label="Filter tracker to stage 4">
+          <span class="stage-number">04</span><h3>Cleanup + platinum</h3>
+          <p>Explore the remaining map, revisit uncertain activities, finish 100% completion, and check each remaining trophy against your save.</p>
+          <span class="stage-count" id="stage-count-4">0 trophies</span><span class="stage-progress-text" id="stage-earned-4">0 / 0 earned</span>
+          <span class="mini-track"><span id="stage-progress-4"></span></span>
+        </button></li>
       </ol>
-      <p class="roadmap-warning"><strong>Missable · Positive Mental Attitude</strong> — use Lucia’s Chapter 1 balcony meditation spot before the chapter ends. Keep your chapter-start manual save; there is no mission replay. The data’s reported 18-spot total remains unconfirmed.</p>
+      <p class="roadmap-warning"><strong>Missable · Positive Mental Attitude</strong> — the current notes report that Lucia’s Chapter 1 balcony meditation disappears when that chapter ends. Keep an early manual save; the reported total number of meditation spots is unconfirmed.</p>
     </section>
 
     <section class="tracker panel" aria-labelledby="tracker-title">
       <div class="section-heading tracker-heading">
-        <div>
-          <p class="section-label">THE CHECKLIST</p>
-          <h2 id="tracker-title">Trophy tracker</h2>
-        </div>
+        <div><p class="section-label">THE CHECKLIST</p><h2 id="tracker-title">Trophy tracker</h2></div>
         <span id="results-count" class="section-note">55 trophies</span>
       </div>
-
-      <div class="controls" aria-label="Trophy filters">
-        <label class="search-control" for="search">
-          <span>Find a trophy</span>
-          <input id="search" type="search" placeholder="Search names, guides, or descriptions" autocomplete="off">
-        </label>
-        <label for="kind">
-          <span>Kind</span>
-          <select id="kind">
-            <option value="all">All kinds</option>
-            <option value="story">Story</option>
-            <option value="missable">Missable</option>
-            <option value="collectibles">Collectibles</option>
-            <option value="activities">Activities</option>
-            <option value="online">Online</option>
-          </select>
-        </label>
-        <label for="grade">
-          <span>Grade</span>
-          <select id="grade">
-            <option value="all">All grades</option>
-            <option value="platinum">Platinum</option>
-            <option value="gold">Gold</option>
-            <option value="silver">Silver</option>
-            <option value="bronze">Bronze</option>
-          </select>
-        </label>
-        <label class="toggle-control" for="spoiler">
-          <input id="spoiler" type="checkbox">
-          <span class="toggle" aria-hidden="true"></span>
-          <span>Hide story spoilers</span>
-        </label>
-        <div class="file-actions">
-          <button id="export" class="button button-primary" type="button">Export progress</button>
-          <label class="button button-quiet" for="import">Import progress<input id="import" type="file" accept="application/json"></label>
-        </div>
+      <div class="controls" aria-label="Trophy filters and actions">
+        <label class="search-control" for="search"><span>Find a trophy</span><input id="search" type="search" placeholder="Search names, guides, or descriptions" autocomplete="off"></label>
+        <label for="kind"><span>Kind</span><select id="kind"><option value="all">All kinds</option><option value="story">Story</option><option value="missable">Missable</option><option value="collectibles">Collectibles</option><option value="activities">Activities</option></select></label>
+        <label for="grade"><span>Grade</span><select id="grade"><option value="all">All grades</option><option value="platinum">Platinum</option><option value="gold">Gold</option><option value="silver">Silver</option><option value="bronze">Bronze</option></select></label>
+        <label for="stage"><span>Stage</span><select id="stage"><option value="all">All stages</option><option value="1">Stage 1</option><option value="2">Stage 2</option><option value="3">Stage 3</option><option value="4">Stage 4</option></select></label>
+        <label for="sort"><span>Sort</span><select id="sort"><option value="roadmap">Roadmap order</option><option value="name">Name A–Z</option><option value="grade">Grade (platinum first)</option><option value="difficulty">Difficulty (hardest first)</option><option value="time">Time (longest first)</option></select></label>
+        <label class="toggle-control" for="spoiler"><input id="spoiler" type="checkbox"><span class="toggle" aria-hidden="true"></span><span>Hide story spoilers</span></label>
+        <label class="toggle-control" for="hide-earned"><input id="hide-earned" type="checkbox"><span class="toggle" aria-hidden="true"></span><span>Hide earned</span></label>
+        <div class="file-actions"><button id="export" class="button button-primary" type="button">Export progress</button><label class="button button-quiet" for="import">Import progress<input id="import" type="file" accept="application/json"></label><button id="reset" class="button button-danger" type="button">Reset progress</button></div>
       </div>
       <p id="status" class="status" role="status" aria-live="polite"></p>
-
       <div class="tracker-grid">
         <div class="table-wrap">
-          <table>
-            <thead>
-              <tr><th scope="col">Done</th><th scope="col">Trophy</th><th scope="col">Grade</th><th scope="col">Route</th></tr>
-            </thead>
-            <tbody id="rows"></tbody>
-          </table>
+          <table><thead><tr><th scope="col">Done</th><th scope="col">Trophy</th><th scope="col">Grade</th><th scope="col">Route</th></tr></thead><tbody id="rows"></tbody></table>
           <div id="empty" class="empty" hidden>No trophies match those filters.</div>
         </div>
-
         <aside id="detail" class="detail" aria-labelledby="detail-title">
-          <div class="detail-empty">
-            <span class="detail-mark">✦</span>
-            <p class="section-label">FIELD NOTES</p>
-            <h2>Select a trophy</h2>
-            <p>Choose a row to open its guide, route stage, and source links.</p>
-          </div>
+          <div class="detail-empty"><span class="detail-mark">✦</span><p class="section-label">FIELD NOTES</p><h2>Select a trophy</h2><p>Open a row for its guide, difficulty, route stage, and source links.</p></div>
           <div id="detail-content" hidden>
             <div class="detail-topline"><span id="detail-kind" class="pill">Story</span><span id="detail-missable" class="missable-badge" hidden>Missable</span></div>
-            <h2 id="detail-title"></h2>
-            <p id="detail-description" class="detail-description"></p>
-            <div class="detail-meta">
-              <div><span>Grade</span><strong id="detail-grade"></strong></div>
-              <div><span>Roadmap</span><strong id="detail-stage"></strong></div>
-            </div>
+            <h2 id="detail-title"></h2><p id="detail-description" class="detail-description"></p>
+            <p id="detail-target" class="target-line" hidden></p>
+            <div class="detail-meta"><div><span>Grade</span><strong id="detail-grade"></strong></div><div><span>Roadmap</span><strong id="detail-stage"></strong></div><div><span>Difficulty</span><strong id="detail-difficulty"></strong></div><div><span>Estimated time</span><strong id="detail-time"></strong></div></div>
+            <div id="detail-missable-note" class="missable-note" hidden><h3>Missable note</h3><p id="detail-missable-text"></p></div>
             <div class="detail-block"><h3>Your guide</h3><p id="detail-guide"></p></div>
             <div class="detail-block"><h3>Sources</h3><ul id="detail-sources" class="source-list"></ul></div>
           </div>
@@ -145,7 +102,6 @@
       </div>
     </section>
   </main>
-
   <footer class="shell footer"><span>GTA VI Trophy Guide · offline-ready field notes</span><a href="#roadmap">Back to roadmap ↑</a></footer>
   <script type="module" src="app.js"></script>
 </body>

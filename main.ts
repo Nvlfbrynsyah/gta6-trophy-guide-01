@@ -1,23 +1,24 @@
-import { cpSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { existsSync } from 'node:fs';
+import { cp, mkdir, writeFile } from 'node:fs/promises';
+import { join, resolve } from 'node:path';
 import { buildDossier } from './vendor/makefun-frontend.ts';
 
-const entryDir = fileURLToPath(new URL('.', import.meta.url));
-const outputDir = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
-
-mkdirSync(outputDir, { recursive: true });
-cpSync(join(entryDir, 'app'), join(outputDir, 'app'), { recursive: true });
-
-const screenshotDir = join(entryDir, 'screenshots');
-if (existsSync(screenshotDir)) {
-  cpSync(screenshotDir, join(outputDir, 'screenshots'), { recursive: true });
-}
-
-const dossier = buildDossier(outputDir, {
+const dossierLimits = {
   text_max_bytes: 163840,
   screenshots: { max: 4, max_bytes: 262144 },
   app_max_files: 993,
   app_max_bytes: 50331648,
-});
-writeFileSync(join(outputDir, 'dossier.json'), dossier);
+};
+
+async function packageEntry(destination: string) {
+  await mkdir(destination, { recursive: true });
+  for (const folder of ['app', 'screenshots']) {
+    const source = new URL(`./${folder}/`, import.meta.url);
+    if (folder === 'screenshots' && !existsSync(source)) continue;
+    await cp(source, join(destination, folder), { recursive: true });
+  }
+  const dossierBytes = buildDossier(destination, dossierLimits);
+  await writeFile(join(destination, 'dossier.json'), dossierBytes);
+}
+
+await packageEntry(resolve(process.env.MAKEFUN_OUTPUT_DIR ?? '/output'));
